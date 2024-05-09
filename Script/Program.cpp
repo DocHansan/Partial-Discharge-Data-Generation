@@ -27,6 +27,7 @@ int main()
                 U_0 = U_z * _U_0;
 
                 fout << "Uz = " << U_z << ", Up = " << U_p << ", U0 = " << U_0 << '\n' << '\n';
+                cout << "Generating data for Uz = " << U_z << " , Up = " << U_p << " , U0 = " << U_0 << '\n';
 
                 for (double i = 0; i <= 16; i += Time_step)
                 {
@@ -37,9 +38,8 @@ int main()
 
                     else
                     {
-                        if (0.5 < fmod(i, 2) && fmod(i, 2) <= 1.5) {
+                        if (0.5 < fmod(i, 2) && fmod(i, 2) <= 1.5)
                             f_last + (f_m - f_m_last) <= -U_z ? f = f_last + (U_z - U_p) + (f_m - f_m_last) : f = f_last + (f_m - f_m_last);
-                        }
                         else
                             f_last + (f_m - f_m_last) >= U_z ? f = f_last - (U_z - U_p) + (f_m - f_m_last) : f = f_last + (f_m - f_m_last);
                     }
