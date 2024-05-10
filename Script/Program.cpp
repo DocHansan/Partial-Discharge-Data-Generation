@@ -60,9 +60,11 @@ int main()
             cout << "Введите Uz, Up, Uo (через пробел, для разделения целой и дробной части используйте точку)" << endl;
             cin >> U_z >> U_p >> U_0;
             ofstream file;
-            file.open("Uz" + to_string(U_z) + "Up" + to_string(U_p) + "Uo" + to_string(U_0) + ".txt");
+            string filename = "Uz" + to_string(U_z) + "Up" + to_string(U_p) + "Uo" + to_string(U_0) + ".txt";
+            file.open(filename);
             Make_Data(file, U_z, U_p, U_0);
             file.close();
+            cout << "В папке с программой создан файл с данными: " << filename << endl;
             break;
         }
         default:
