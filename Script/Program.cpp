@@ -9,6 +9,18 @@
 
 using namespace std;
 
+enum class Action
+{
+    Quit,
+    MakeBD,
+    CalculateWithPreparedData,
+};
+enum class DB_Type
+{
+    DB,
+    DB_Discharge,
+};
+
 double Pi = atan(1) * 4;
 
 //double U_m, U_z, U_p, U_0;
@@ -22,15 +34,9 @@ double Pi_time = 0.01;
 double Time_step = 0.00005;
 int Pi_steps_count = round(Pi_time / Time_step);
 
-void Make_DB(string File_name);
+void Make_DB(string File_name, DB_Type DB_Type);
 void Make_Data(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m = 1);
-
-enum class Action
-{
-    Quit,
-    MakeBD,
-    CalculateWithPreparedData,
-};
+void Make_Data_Find_Discharge(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m = 1);
 
 int main()
 {
@@ -53,18 +59,26 @@ int main()
             ProgramRunning = false;
             break;
         case Action::MakeBD:
-            Make_DB("DB.txt");
+            Make_DB("DB.txt", DB_Type::DB);
+            Make_DB("DB_discharge.txt", DB_Type::DB_Discharge);
             break;
         case Action::CalculateWithPreparedData:
         {
             cout << "Введите Uz, Up, Uo (через пробел, для разделения целой и дробной части используйте точку)" << endl;
             cin >> U_z >> U_p >> U_0;
+
             ofstream file;
-            string filename = "Uz" + to_string(U_z) + "Up" + to_string(U_p) + "Uo" + to_string(U_0) + ".txt";
-            file.open(filename);
+            string filename = "Uz" + to_string(U_z) + "Up" + to_string(U_p) + "Uo" + to_string(U_0);
+            file.open(filename + ".txt");
             Make_Data(file, U_z, U_p, U_0);
             file.close();
-            cout << "В папке с программой создан файл с данными: " << filename << endl;
+            cout << "В папке с программой создан файл с данными: " << filename + ".txt" << endl;
+
+            ofstream file_discharge;
+            file_discharge.open(filename + "_discharge" + ".txt");
+            Make_Data_Find_Discharge(file_discharge, U_z, U_p, U_0);
+            file_discharge.close();
+            cout << "В папке с программой создан файл с данными о разрядах: " << filename + "_discharge" + ".txt" << endl;
             break;
         }
         default:
@@ -106,7 +120,7 @@ void Make_Data(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_
     }
 }
 
-void Make_DB(string File_name)
+void Make_DB(string File_name, DB_Type DB_Type)
 {
     double U_m, U_z, U_p, U_0;
 
@@ -126,12 +140,66 @@ void Make_DB(string File_name)
                 file << "Uz = " << U_z << " Up = " << U_p << " U0 = " << U_0 << '\n' << '\n';
                 cout << "Generating data for Uz = " << U_z << " , Up = " << U_p << " , U0 = " << U_0 << '\n';
 
-                Make_Data(file, U_z, U_p, U_0);
+                switch (DB_Type)
+                {
+                case DB_Type::DB:
+                    Make_Data(file, U_z, U_p, U_0);
+                    break;
+                case DB_Type::DB_Discharge:
+                    Make_Data_Find_Discharge(file, U_z, U_p, U_0);
+                    break;
+                }
 
                 file << '\n';
-
             }
         }
     }
     file.close();
+}
+
+void Make_Data_Find_Discharge(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m)
+{
+    double current_time, f_m, f_m_last, f, f_last;
+
+    for (int i = 0; i <= Time_max / Time_step; i += 1)
+    {
+        current_time = i * Time_step;
+        f_m = sin(current_time * Pi * 100);
+
+        if (i == 0)
+        {
+            f = _U_0 + f_m;
+        }
+        else
+        {
+            //cout << f_last + (f_m - f_m_last) << endl;
+            if (Pi_steps_count / 2 < i % (2 * Pi_steps_count) && i % (2 * Pi_steps_count) <= Pi_steps_count / 2 * 3)
+            {
+                if (f_last + (f_m - f_m_last) <= -_U_z)
+                {
+                    file << current_time << '\n';
+                    f = f_last + (_U_z - _U_p) + (f_m - f_m_last);
+                }
+                else
+                {
+                    f = f_last + (f_m - f_m_last);
+                }
+            }
+            else
+            {
+                if (f_last + (f_m - f_m_last) >= _U_z)
+                {
+                    file << current_time << '\n';
+                    f = f_last - (_U_z - _U_p) + (f_m - f_m_last);
+                }
+                else
+                {
+                    f = f_last + (f_m - f_m_last);
+                }
+            }
+        }
+
+        f_m_last = f_m;
+        f_last = f;
+    }
 }
