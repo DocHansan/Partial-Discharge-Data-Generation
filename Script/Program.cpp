@@ -15,11 +15,6 @@ enum class Action
     MakeBD,
     CalculateWithPreparedData,
 };
-enum class DB_Type
-{
-    DB,
-    DB_Discharge,
-};
 
 double Pi = atan(1) * 4;
 
@@ -34,9 +29,9 @@ double Pi_time = 0.01;
 double Time_step = 0.00005;
 int Pi_steps_count = round(Pi_time / Time_step);
 
-void Make_DB(string File_name, DB_Type DB_Type);
+void Make_DB(string File_name);
 void Make_Data(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m = 1);
-void Make_Data_Find_Discharge(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m = 1);
+void Make_Data_Find_Discharge(ofstream& file1, ofstream& file2, double _U_z, double _U_p, double _U_0, double _U_m = 1);
 
 int main()
 {
@@ -48,9 +43,9 @@ int main()
 
     while (ProgramRunning)
     {
-        cout << "Чтобы создать базу данных ЧР, введите 1" << endl;
-        cout << "Чтобы расчитать ЧР с заданными значениями, введите 2" << endl;
-        cout << "Чтобы выйти, введите 0" << endl;
+        cout << "Чтобы создать базу данных ЧР, введите 1" << '\n';
+        cout << "Чтобы расчитать ЧР с заданными значениями, введите 2" << '\n';
+        cout << "Чтобы выйти, введите 0" << '\n';
         cin >> user_input;
 
         switch (static_cast<Action>(user_input))
@@ -59,12 +54,11 @@ int main()
             ProgramRunning = false;
             break;
         case Action::MakeBD:
-            Make_DB("DB.txt", DB_Type::DB);
-            Make_DB("DB_discharge.txt", DB_Type::DB_Discharge);
+            Make_DB("DB");
             break;
         case Action::CalculateWithPreparedData:
         {
-            cout << "Введите Uz, Up, Uo (через пробел, для разделения целой и дробной части используйте точку)" << endl;
+            cout << "Введите Uz, Up, Uo (через пробел, для разделения целой и дробной части используйте точку)" << '\n';
             cin >> U_z >> U_p >> U_0;
 
             ofstream file;
@@ -72,17 +66,19 @@ int main()
             file.open(filename + ".txt");
             Make_Data(file, U_z, U_p, U_0);
             file.close();
-            cout << "В папке с программой создан файл с данными: " << filename + ".txt" << endl;
+            cout << "В папке с программой создан файл с данными: " << filename + ".txt" << '\n';
 
             ofstream file_discharge;
+            ofstream file_discharge_delta_time;
             file_discharge.open(filename + "_discharge" + ".txt");
-            Make_Data_Find_Discharge(file_discharge, U_z, U_p, U_0);
+            file_discharge.open(filename + "_discharge_delta_time" + ".txt");
+            Make_Data_Find_Discharge(file_discharge, file_discharge_delta_time, U_z, U_p, U_0);
             file_discharge.close();
-            cout << "В папке с программой создан файл с данными о разрядах: " << filename + "_discharge" + ".txt" << endl;
+            cout << "В папке с программой создан файл с данными о разрядах: " << filename + "_discharge" + ".txt" << '\n';
             break;
         }
         default:
-            cout << "Введено неверное значение" << endl;
+            cout << "Введено неверное значение" << '\n';
         }
     }
     return 0;
@@ -120,12 +116,19 @@ void Make_Data(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_
     }
 }
 
-void Make_DB(string File_name, DB_Type DB_Type)
+void Make_DB(string File_name)
 {
     double U_m, U_z, U_p, U_0;
 
-    ofstream file;
-    file.open(File_name);
+    ofstream file1;
+    file1.open(File_name + ".txt");
+
+    ofstream file2;
+    file2.open(File_name + "_Discharges.txt");
+
+    ofstream file3;
+    file3.open(File_name + "_Discharges_Delta_Time.txt");
+
 
     for (double _U_z = U_z_min; _U_z <= U_z_max; _U_z += U_z_step)
     {
@@ -137,29 +140,42 @@ void Make_DB(string File_name, DB_Type DB_Type)
                 U_p = _U_p * U_z;
                 U_0 = _U_0 * U_z;
 
-                file << "Uz = " << U_z << " Up = " << U_p << " U0 = " << U_0 << '\n' << '\n';
                 cout << "Generating data for Uz = " << U_z << " , Up = " << U_p << " , U0 = " << U_0 << '\n';
 
-                switch (DB_Type)
-                {
-                case DB_Type::DB:
-                    Make_Data(file, U_z, U_p, U_0);
-                    break;
-                case DB_Type::DB_Discharge:
-                    Make_Data_Find_Discharge(file, U_z, U_p, U_0);
-                    break;
-                }
+                file1 << "Uz = " << U_z << " Up = " << U_p << " U0 = " << U_0 << '\n' << '\n';
+                Make_Data(file1, U_z, U_p, U_0);
+                file1 << '\n';
 
-                file << '\n';
+                file2 << "Uz = " << U_z << " Up = " << U_p << " U0 = " << U_0 << '\n' << '\n';
+                file3 << "Uz = " << U_z << " Up = " << U_p << " U0 = " << U_0 << '\n' << '\n';
+                Make_Data_Find_Discharge(file2, file3, U_z, U_p, U_0);
+                file2 << '\n';
+                file3 << '\n';
             }
         }
     }
-    file.close();
+    file1.close();
 }
 
-void Make_Data_Find_Discharge(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m)
+double Compare_With_Last_Time(ofstream& file, double last_charge_time, double current_time)
 {
-    double current_time, f_m, f_m_last, f, f_last;
+    if (last_charge_time == 0)
+    {
+        last_charge_time = current_time;
+    }
+    else
+    {
+        file << current_time - last_charge_time << '\n';
+        last_charge_time = current_time;
+    }
+    return last_charge_time;
+}
+
+void Make_Data_Find_Discharge(ofstream& file1, ofstream& file2, double _U_z, double _U_p, double _U_0, double _U_m)
+{
+    double current_time, f_m, f_m_last, f, f_last, last_charge_time = 0;
+
+    bool Is_Upward_Direction = true;
 
     for (int i = 0; i <= Time_max / Time_step; i += 1)
     {
@@ -172,13 +188,19 @@ void Make_Data_Find_Discharge(ofstream& file, double _U_z, double _U_p, double _
         }
         else
         {
-            //cout << f_last + (f_m - f_m_last) << endl;
             if (Pi_steps_count / 2 < i % (2 * Pi_steps_count) && i % (2 * Pi_steps_count) <= Pi_steps_count / 2 * 3)
             {
+                if (Is_Upward_Direction)
+                {
+                    Is_Upward_Direction = !Is_Upward_Direction;
+                    last_charge_time = 0;
+
+                }
                 if (f_last + (f_m - f_m_last) <= -_U_z)
                 {
-                    file << current_time << '\n';
+                    file1 << current_time << '\n';
                     f = f_last + (_U_z - _U_p) + (f_m - f_m_last);
+                    last_charge_time = Compare_With_Last_Time(file2, last_charge_time, current_time);
                 }
                 else
                 {
@@ -187,10 +209,16 @@ void Make_Data_Find_Discharge(ofstream& file, double _U_z, double _U_p, double _
             }
             else
             {
+                if (!Is_Upward_Direction)
+                {
+                    Is_Upward_Direction = !Is_Upward_Direction;
+                    last_charge_time = 0;
+                }
                 if (f_last + (f_m - f_m_last) >= _U_z)
                 {
-                    file << current_time << '\n';
+                    file1 << current_time << '\n';
                     f = f_last - (_U_z - _U_p) + (f_m - f_m_last);
+                    last_charge_time = Compare_With_Last_Time(file2, last_charge_time, current_time);
                 }
                 else
                 {
