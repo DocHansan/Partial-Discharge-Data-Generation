@@ -279,7 +279,7 @@ vector<double> Get_Deltas_From_measurements(vector<double> measurements)
 void Find_Measurements(ifstream& file, vector<double> measurements, vector<double> measured_deltas)
 {
     string line, output_file_name = "Matches_With_DB.txt";
-    double current_delta, U_z, U_p, U_0, measured_deltas_index;
+    double current_delta, U_z, U_z_cache, U_p, U_0, measured_deltas_index;
     bool streak_of_matches = false, skip_to_next = false;
 
     ofstream output_file;
@@ -297,6 +297,7 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
 
         if (iss >> U_z >> U_p >> U_0)
         {
+            U_z_cache = U_z;
             cout << "Идет сравнение с Uz = " << U_z << " Up = " << U_p << " Uo = " << U_0 << '\n';
             measured_deltas_index = 0;
             streak_of_matches = false;
@@ -317,8 +318,8 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
                     {
                         if (measured_deltas_index == measured_deltas.size() - 1)
                         {
-                            cout << "Совпадение с Uz " << U_z << " Up " << U_p << " Uo " << U_0 << '\n';
-                            output_file << "Совпадение с Uz " << U_z << " Up " << U_p << " Uo " << U_0 << '\n';
+                            cout << "Совпадение с Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
+                            output_file << "Совпадение с Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
                             skip_to_next = true;
                         }
 
