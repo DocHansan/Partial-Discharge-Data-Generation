@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <fstream>
 #include <string>
 #include <cmath>
@@ -53,11 +53,11 @@ int main()
 
     while (ProgramRunning)
     {
-        cout << "×òîáû ñîçäàòü áàçó äàííûõ ×Ð, ââåäèòå 1" << '\n' << '\n';
-        cout << "×òîáû ðàñ÷èòàòü ×Ð ñ çàäàííûìè çíà÷åíèÿìè, ââåäèòå 2" << '\n' << '\n';
-        cout << "×òîáû âûïîëíèòü ïîèñê èçìåðåííûõ ×Ð â áàçå äàííûõ, ââåäèòå 3" << '\n';
-        cout << "Ôàéë ñ èçìåðåííûìè çíà÷åíèÿìè âðåìåíè ×Ð äîëæåí ëåæàòü â äèðåêòîðèè ïðîãðàììû ñ íàçâàíèåì " + Measurements_File_Name << '\n' << '\n';
-        cout << "×òîáû âûéòè, ââåäèòå 0" << '\n' << '\n';
+        cout << "Ð§Ñ‚Ð¾Ð±Ñ‹ ÑÐ¾Ð·Ð´Ð°Ñ‚ÑŒ Ð±Ð°Ð·Ñƒ Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð§Ð , Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 1" << '\n' << '\n';
+        cout << "Ð§Ñ‚Ð¾Ð±Ñ‹ Ñ€Ð°ÑÑ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ Ð§Ð  Ñ Ð·Ð°Ð´Ð°Ð½Ð½Ñ‹Ð¼Ð¸ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸ÑÐ¼Ð¸, Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 2" << '\n' << '\n';
+        cout << "Ð§Ñ‚Ð¾Ð±Ñ‹ Ð²Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð¸ÑÐº Ð¸Ð·Ð¼ÐµÑ€ÐµÐ½Ð½Ñ‹Ñ… Ð§Ð  Ð² Ð±Ð°Ð·Ðµ Ð´Ð°Ð½Ð½Ñ‹Ñ…, Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 3" << '\n';
+        cout << "Ð¤Ð°Ð¹Ð» Ñ Ð¸Ð·Ð¼ÐµÑ€ÐµÐ½Ð½Ñ‹Ð¼Ð¸ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸ÑÐ¼Ð¸ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð¸ Ð§Ð  Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð»ÐµÐ¶Ð°Ñ‚ÑŒ Ð² Ð´Ð¸Ñ€ÐµÐºÑ‚Ð¾Ñ€Ð¸Ð¸ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹ Ñ Ð½Ð°Ð·Ð²Ð°Ð½Ð¸ÐµÐ¼ " + Measurements_File_Name << '\n' << '\n';
+        cout << "Ð§Ñ‚Ð¾Ð±Ñ‹ Ð²Ñ‹Ð¹Ñ‚Ð¸, Ð²Ð²ÐµÐ´Ð¸Ñ‚Ðµ 0" << '\n' << '\n';
         cin >> user_input;
 
         switch (static_cast<Action>(user_input))
@@ -70,7 +70,7 @@ int main()
             break;
         case Action::CalculateWithPreparedData:
         {
-            cout << "Ââåäèòå Uz, Up, Uo (÷åðåç ïðîáåë, äëÿ ðàçäåëåíèÿ öåëîé è äðîáíîé ÷àñòè èñïîëüçóéòå òî÷êó)" << '\n' << '\n';
+            cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Uz, Up, Uo (Ñ‡ÐµÑ€ÐµÐ· Ð¿Ñ€Ð¾Ð±ÐµÐ», Ð´Ð»Ñ Ñ€Ð°Ð·Ð´ÐµÐ»ÐµÐ½Ð¸Ñ Ñ†ÐµÐ»Ð¾Ð¹ Ð¸ Ð´Ñ€Ð¾Ð±Ð½Ð¾Ð¹ Ñ‡Ð°ÑÑ‚Ð¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ñ‚Ð¾Ñ‡ÐºÑƒ)" << '\n' << '\n';
             cin >> U_z >> U_p >> U_0;
 
             ofstream file;
@@ -78,7 +78,7 @@ int main()
             file.open(filename + ".txt");
             Make_Data(file, U_z, U_p, U_0);
             file.close();
-            cout << "Â ïàïêå ñ ïðîãðàììîé ñîçäàí ôàéë ñ äàííûìè: " << filename + ".txt" << '\n' << '\n';
+            cout << "Ð’ Ð¿Ð°Ð¿ÐºÐµ Ñ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ð¾Ð¹ ÑÐ¾Ð·Ð´Ð°Ð½ Ñ„Ð°Ð¹Ð» Ñ Ð´Ð°Ð½Ð½Ñ‹Ð¼Ð¸: " << filename + ".txt" << '\n' << '\n';
 
             ofstream file_discharge;
             ofstream file_discharge_delta_time;
@@ -86,7 +86,7 @@ int main()
             file_discharge.open(filename + "_discharge_delta_time" + ".txt");
             Make_Data_Discharges_And_Deltas(file_discharge, file_discharge_delta_time, U_z, U_p, U_0);
             file_discharge.close();
-            cout << "Â ïàïêå ñ ïðîãðàììîé ñîçäàí ôàéë ñ äàííûìè î ðàçðÿäàõ: " << filename + "_discharge" + ".txt" << '\n' << '\n';
+            cout << "Ð’ Ð¿Ð°Ð¿ÐºÐµ Ñ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ð¾Ð¹ ÑÐ¾Ð·Ð´Ð°Ð½ Ñ„Ð°Ð¹Ð» Ñ Ð´Ð°Ð½Ð½Ñ‹Ð¼Ð¸ Ð¾ Ñ€Ð°Ð·Ñ€ÑÐ´Ð°Ñ…: " << filename + "_discharge" + ".txt" << '\n' << '\n';
             break;
         }
         case Action::FindMeasurements:
@@ -110,7 +110,7 @@ int main()
             break;
         }
         default:
-            cout << "Ââåäåíî íåâåðíîå çíà÷åíèå" << '\n' << '\n';
+            cout << "Ð’Ð²ÐµÐ´ÐµÐ½Ð¾ Ð½ÐµÐ²ÐµÑ€Ð½Ð¾Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ" << '\n' << '\n';
         }
     }
     return 0;
@@ -298,7 +298,7 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
         if (iss >> U_z >> U_p >> U_0)
         {
             U_z_cache = U_z;
-            cout << "Èäåò ñðàâíåíèå ñ Uz = " << U_z << " Up = " << U_p << " Uo = " << U_0 << '\n';
+            cout << "Ð˜Ð´ÐµÑ‚ ÑÑ€Ð°Ð²Ð½ÐµÐ½Ð¸Ðµ Ñ Uz = " << U_z << " Up = " << U_p << " Uo = " << U_0 << '\n';
             measured_deltas_index = 0;
             streak_of_matches = false;
             skip_to_next = false;
@@ -318,8 +318,8 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
                     {
                         if (measured_deltas_index == measured_deltas.size() - 1)
                         {
-                            cout << "Ñîâïàäåíèå ñ Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
-                            output_file << "Ñîâïàäåíèå ñ Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
+                            cout << "Ð¡Ð¾Ð²Ð¿Ð°Ð´ÐµÐ½Ð¸Ðµ Ñ Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
+                            output_file << "Ð¡Ð¾Ð²Ð¿Ð°Ð´ÐµÐ½Ð¸Ðµ Ñ Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
                             skip_to_next = true;
                         }
 
@@ -339,7 +339,7 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
             }
         }
     }
-    cout << "Äàííûå çàïèñàíû â ôàéë " + output_file_name << '\n' << '\n';
+    cout << "Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð·Ð°Ð¿Ð¸ÑÐ°Ð½Ñ‹ Ð² Ñ„Ð°Ð¹Ð» " + output_file_name << '\n' << '\n';
     output_file.close();
 }
 
