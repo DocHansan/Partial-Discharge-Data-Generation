@@ -39,7 +39,7 @@ void Make_Data(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_
 void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U_z, double _U_p, double _U_0, double _U_m = 1);
 void Find_Measurements(ifstream& file, vector<double> measurements, vector<double> measured_deltas);
 bool Compare_Deltas(double db_delta, double measured_delta);
-vector<double> Get_Deltas_From_measurements(vector<double> measurements);
+vector<double> Get_Deltas_From_Measurements(vector<double> measurements);
 
 string Measurements_File_Name = "Measurements.txt";
 
@@ -105,7 +105,7 @@ int main()
 
             ifstream Discharges_Delta_Time("DB_Discharges_Delta_Time.txt");
 
-            Find_Measurements(Discharges_Delta_Time, Measurements, Get_Deltas_From_measurements(Measurements));
+            Find_Measurements(Discharges_Delta_Time, Measurements, Get_Deltas_From_Measurements(Measurements));
 
             break;
         }
@@ -188,25 +188,19 @@ void Make_DB(string File_name)
     file1.close();
 }
 
-double Compare_With_Last_Time(ofstream& file, double last_charge_time, double current_time)
+void Write_Delta_In_File(ofstream& file, double *first_discharge_time, double current_time)
 {
-    if (last_charge_time == 0)
+    if (*first_discharge_time == 0)
     {
-        last_charge_time = current_time;
+        *first_discharge_time = current_time;
+        return;
     }
-    else
-    {
-        file << current_time - last_charge_time << '\n';
-        last_charge_time = current_time;
-    }
-    return last_charge_time;
+    file << current_time - (*first_discharge_time) << '\n';
 }
 
 void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U_z, double _U_p, double _U_0, double _U_m)
 {
-    double current_time, f_m, f_m_last, f, f_last, last_charge_time = 0;
-
-    //bool Is_Upward_Direction = true;
+    double current_time, f_m, f_m_last, f, f_last, first_discharge_time = 0;
 
     for (int i = 0; i <= Time_max / Time_step; i += 1)
     {
@@ -221,17 +215,11 @@ void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U
         {
             if (Pi_steps_count / 2 < i % (2 * Pi_steps_count) && i % (2 * Pi_steps_count) <= Pi_steps_count / 2 * 3)
             {
-                /*if (Is_Upward_Direction)
-                {
-                    Is_Upward_Direction = !Is_Upward_Direction;
-                    last_charge_time = 0;
-
-                }*/
                 if (f_last + (f_m - f_m_last) <= -_U_z)
                 {
                     file1 << current_time << '\n';
                     f = f_last + (_U_z - _U_p) + (f_m - f_m_last);
-                    last_charge_time = Compare_With_Last_Time(file2, last_charge_time, current_time);
+                    Write_Delta_In_File(file2, &first_discharge_time, current_time);
                 }
                 else
                 {
@@ -249,7 +237,7 @@ void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U
                 {
                     file1 << current_time << '\n';
                     f = f_last - (_U_z - _U_p) + (f_m - f_m_last);
-                    last_charge_time = Compare_With_Last_Time(file2, last_charge_time, current_time);
+                    Write_Delta_In_File(file2, &first_discharge_time, current_time);
                 }
                 else
                 {
@@ -263,7 +251,7 @@ void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U
     }
 }
 
-vector<double> Get_Deltas_From_measurements(vector<double> measurements)
+vector<double> Get_Deltas_From_Measurements(vector<double> measurements)
 {
     sort(begin(measurements), end(measurements));
 
@@ -271,7 +259,7 @@ vector<double> Get_Deltas_From_measurements(vector<double> measurements)
 
     for (int i = 1; i < measurements.size(); i++)
     {
-        measurements_deltas.push_back(measurements[i] - measurements[i - 1]);
+        measurements_deltas.push_back(measurements[i] - measurements[0]);
     }
     return measurements_deltas;
 }
@@ -310,7 +298,7 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
             {
                 //cout << current_delta << endl;
                 if (skip_to_next) continue;
-                //cout << current_delta << "   " << measured_deltas[measured_deltas_index] << endl;
+                cout << current_delta << "   " << measured_deltas[measured_deltas_index] << endl;
                 if (Compare_Deltas(current_delta, measured_deltas[measured_deltas_index]))
                 {
                     //cout << "true" << endl;
