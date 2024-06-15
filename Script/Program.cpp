@@ -21,6 +21,7 @@ enum class Action
 };
 
 double Pi = atan(1) * 4;
+const double eps = 1e-12;
 
 //double U_m, U_z, U_p, U_0;
 
@@ -29,6 +30,7 @@ double U_p_min = 0.1, U_p_max = 0.9, U_p_step = 0.1;
 double U_0_min = -0.9, U_0_max = 0.9, U_0_step = 0.1;
 double Time_min = 0, Time_max = 0.16;
 double Delta_Deviation_Percent = 0.03;
+double Number_Of_Matches_To_Write_To_file = 9;
 
 double Pi_time = 0.01;
 double Time_step = 0.00005;
@@ -37,7 +39,7 @@ int Pi_steps_count = round(Pi_time / Time_step);
 void Make_DB(string File_name);
 void Make_Data(ofstream& file, double _U_z, double _U_p, double _U_0, double _U_m = 1);
 void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U_z, double _U_p, double _U_0, double _U_m = 1);
-void Find_Measurements(ifstream& file, vector<double> measurements, vector<double> measured_deltas);
+void Find_Measurements(ifstream& file, vector<double> measurements);
 bool Compare_Deltas(double db_delta, double measured_delta);
 vector<double> Get_Deltas_From_Measurements(vector<double> measurements);
 
@@ -53,11 +55,11 @@ int main()
 
     while (ProgramRunning)
     {
-        cout << "Чтобы создать базу данных ЧР, введите 1" << '\n' << '\n';
-        cout << "Чтобы расчитать ЧР с заданными значениями, введите 2" << '\n' << '\n';
-        cout << "Чтобы выполнить поиск измеренных ЧР в базе данных, введите 3" << '\n';
-        cout << "Файл с измеренными значениями времени ЧР должен лежать в директории программы с названием " + Measurements_File_Name << '\n' << '\n';
-        cout << "Чтобы выйти, введите 0" << '\n' << '\n';
+        std::cout << "Чтобы создать базу данных ЧР, введите 1" << '\n' << '\n';
+        std::cout << "Чтобы расчитать ЧР с заданными значениями, введите 2" << '\n' << '\n';
+        std::cout << "Чтобы выполнить поиск измеренных ЧР в базе данных, введите 3" << '\n';
+        std::cout << "Файл с измеренными значениями времени ЧР должен лежать в директории программы с названием " + Measurements_File_Name << '\n' << '\n';
+        std::cout << "Чтобы выйти, введите 0" << '\n' << '\n';
         cin >> user_input;
 
         switch (static_cast<Action>(user_input))
@@ -70,7 +72,7 @@ int main()
             break;
         case Action::CalculateWithPreparedData:
         {
-            cout << "Введите Uz, Up, Uo (через пробел, для разделения целой и дробной части используйте точку)" << '\n' << '\n';
+            std::cout << "Введите Uz, Up, Uo (через пробел, для разделения целой и дробной части используйте точку)" << '\n' << '\n';
             cin >> U_z >> U_p >> U_0;
 
             ofstream file;
@@ -78,7 +80,7 @@ int main()
             file.open(filename + ".txt");
             Make_Data(file, U_z, U_p, U_0);
             file.close();
-            cout << "В папке с программой создан файл с данными: " << filename + ".txt" << '\n' << '\n';
+            std::cout << "В папке с программой создан файл с данными: " << filename + ".txt" << '\n' << '\n';
 
             ofstream file_discharge;
             ofstream file_discharge_delta_time;
@@ -87,13 +89,13 @@ int main()
             Make_Data_Discharges_And_Deltas(file_discharge, file_discharge_delta_time, U_z, U_p, U_0);
             file_discharge.close();
             file_discharge_delta_time.close();
-            cout << "В папке с программой создан файл с данными о разрядах: " << filename + "_discharge" + ".txt" << '\n' << '\n';
-            cout << "В папке с программой создан файл с данными о дельтах разрядов: " << filename + "_discharge_delta_time" + ".txt" << '\n' << '\n';
+            std::cout << "В папке с программой создан файл с данными о разрядах: " << filename + "_discharge" + ".txt" << '\n' << '\n';
+            std::cout << "В папке с программой создан файл с данными о дельтах разрядов: " << filename + "_discharge_delta_time" + ".txt" << '\n' << '\n';
             break;
         }
         case Action::FindMeasurements:
         {
-            ifstream measurements_file("Measurements.txt");
+            ifstream measurements_file(Measurements_File_Name);
 
             vector<double> Measurements;
             double _measurement;
@@ -102,17 +104,18 @@ int main()
             {
                 Measurements.push_back(_measurement);
             }
+            sort(begin(Measurements), end(Measurements));
 
             measurements_file.close();
 
             ifstream Discharges_Delta_Time("DB_Discharges_Delta_Time.txt");
 
-            Find_Measurements(Discharges_Delta_Time, Measurements, Get_Deltas_From_Measurements(Measurements));
+            Find_Measurements(Discharges_Delta_Time, Measurements);
 
             break;
         }
         default:
-            cout << "Введено неверное значение" << '\n' << '\n';
+            std::cout << "Введено неверное значение" << '\n' << '\n';
         }
     }
     return 0;
@@ -174,7 +177,7 @@ void Make_DB(string File_name)
                 U_p = _U_p * U_z;
                 U_0 = _U_0 * U_z;
 
-                cout << "Generating data for Uz = " << U_z << " , Up = " << U_p << " , U0 = " << U_0 << '\n';
+                std::cout << "Generating data for Uz = " << U_z << " , Up = " << U_p << " , U0 = " << U_0 << '\n';
 
                 file1 << "Uz = " << U_z << " Up = " << U_p << " U0 = " << U_0 << '\n' << '\n';
                 Make_Data(file1, U_z, U_p, U_0);
@@ -250,8 +253,6 @@ void Make_Data_Discharges_And_Deltas(ofstream& file1, ofstream& file2, double _U
 
 vector<double> Get_Deltas_From_Measurements(vector<double> measurements)
 {
-    sort(begin(measurements), end(measurements));
-
     vector<double> measurements_deltas;
 
     for (int i = 1; i < measurements.size(); i++)
@@ -261,11 +262,17 @@ vector<double> Get_Deltas_From_Measurements(vector<double> measurements)
     return measurements_deltas;
 }
 
-void Find_Measurements(ifstream& file, vector<double> measurements, vector<double> measured_deltas)
+bool Compare_Deltas(double db_delta, double measured_delta)
+{
+    return abs(db_delta - measured_delta) <= db_delta * Delta_Deviation_Percent;
+}
+
+void Find_Measurements(ifstream& file, vector<double> measurements)
 {
     string line, output_file_name = "Matches_With_DB.txt";
-    double current_delta, U_z, U_z_cache, U_p, U_0, measured_deltas_index;
-    bool streak_of_matches = false, skip_to_next = false;
+    double current_DB_delta, delta_between_measured_discharges, U_z, U_p, U_0, U_z_cache, U_p_cache, U_0_cache;
+    bool streak_started = false, streak_ended = false, is_delta_founded = false, is_need_change_BD_delta_to_next = false;
+    int first_discharge_index = 0, current_number_of_matches = 0;
 
     ofstream output_file;
     output_file.open(output_file_name);
@@ -276,48 +283,50 @@ void Find_Measurements(ifstream& file, vector<double> measurements, vector<doubl
 
         if (iss >> U_z >> U_p >> U_0)
         {
+            std::cout << "Идет сравнение с Uz = " << U_z << " Up = " << U_p << " Uo = " << U_0 << '\n';
+
+            if (current_number_of_matches >= Number_Of_Matches_To_Write_To_file)
+            {
+                output_file << "Совпадение с Uz " << U_z_cache << " Up " << U_p_cache << " Uo " << U_0_cache << '\n';
+            }
+
+            first_discharge_index = 0;
+            current_number_of_matches = 0;
+            streak_started = false;
+            streak_ended = false;
+            is_need_change_BD_delta_to_next = false;
+
             U_z_cache = U_z;
-            cout << "Идет сравнение с Uz = " << U_z << " Up = " << U_p << " Uo = " << U_0 << '\n';
-            measured_deltas_index = 0;
-            streak_of_matches = false;
-            skip_to_next = false;
+            U_p_cache = U_p;
+            U_0_cache = U_0;
         }
         else
         {
             istringstream iss(line);
-            iss >> current_delta;
-            if (skip_to_next) continue;
-            if (Compare_Deltas(current_delta, measured_deltas[measured_deltas_index]))
+            iss >> current_DB_delta;
+            if (streak_ended) continue;
+            is_delta_founded = false;
+            is_need_change_BD_delta_to_next = false;
+            while (first_discharge_index < measurements.size() - 1)
             {
-                //cout << "true" << endl;
-                if (streak_of_matches)
+                for (int second_discharge_index = first_discharge_index + 1; second_discharge_index < measurements.size(); second_discharge_index++)
                 {
-                    if (measured_deltas_index == measured_deltas.size() - 1)
-                    {
-                        cout << "Совпадение с Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
-                        output_file << "Совпадение с Uz " << U_z_cache << " Up " << U_p << " Uo " << U_0 << '\n';
-                        skip_to_next = true;
-                    }
-
+                    delta_between_measured_discharges = measurements[second_discharge_index] - measurements[first_discharge_index];
+                    if (delta_between_measured_discharges > current_DB_delta + eps) break;
+                    if (!Compare_Deltas(current_DB_delta, delta_between_measured_discharges)) continue;
+                    streak_started = true;
+                    is_delta_founded = true;
+                    first_discharge_index = second_discharge_index - 1;
+                    current_number_of_matches++;
+                    is_need_change_BD_delta_to_next = true;
+                    break;
                 }
-                else
-                {
-                    streak_of_matches = true;
-                }
-                measured_deltas_index++;
+                first_discharge_index++;
+                if (is_need_change_BD_delta_to_next) break;
             }
-            else
-            {
-                measured_deltas_index = 0;
-                streak_of_matches = false;
-            }
+            if (streak_started && !is_delta_founded) streak_ended = true;
         }
     }
-    cout << "Данные записаны в файл " + output_file_name << '\n' << '\n';
+    std::cout << "Данные записаны в файл " + output_file_name << '\n' << '\n';
     output_file.close();
-}
-
-bool Compare_Deltas(double db_delta, double measured_delta)
-{
-    return abs(db_delta - measured_delta) <= db_delta * Delta_Deviation_Percent;
 }
